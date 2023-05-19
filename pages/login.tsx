@@ -14,8 +14,8 @@ export default function LoginPage() {
   return (
     <Layout hideNavigation={true}>
       <div className="h-screen flex items-center">
-        <div className="max-w-sm mx-auto grow -mt-24">
-          <h1 className="text-6xl mb-12 text-gray-300 text-center">
+        <div className="max-w-sm mx-auto grow -mt-32">
+          <h1 className="text-6xl mb-16 font-sans text-socialBlue text-center">
             Se connecter
           </h1>
           <Card noPadding={true}>
