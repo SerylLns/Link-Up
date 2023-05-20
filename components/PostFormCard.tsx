@@ -1,41 +1,62 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import Card from "./Card";
 import Avatar from "./Avatar";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { UserContext } from "@/contexts/userContext";
+import { Result } from "postcss";
+import { photoUrl } from "@/helpers/photoHelpers";
+import { CircleLoader } from "react-spinners";
 
-type ProfileType = {
+export type ProfileType = {
   id: Number;
   avatar: string;
   name: string;
   created_at: string;
 };
 
-const PostFormCard = () => {
-  const [profile, setProfile] = useState<any>(null);
+const PostFormCard = ({ onPost }: { onPost: () => void }) => {
   const [content, setContent] = useState("");
+  const [photos, setPhotos] = useState<Array<string | void>>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
   const supabase = useSupabaseClient();
   const session = useSession();
+  const { profile } = useContext(UserContext);
 
   const createPost = (event: Event) => {
     event.preventDefault();
-    const data = { content, author: session?.user.id };
+    const data = { content, author: session?.user.id, photos };
     supabase
       .from("posts")
       .insert(data)
       .then((res) => {
-        if (!res.error) setContent("");
+        if (!res.error) {
+          setContent("");
+          setPhotos([]);
+          onPost();
+        }
       });
   };
 
-  useEffect(() => {
-    supabase
-      .from("profiles")
-      .select()
-      .eq("id", session?.user.id)
-      .then(({ data }) => {
-        if (data?.length) setProfile(data[0]);
-      });
-  }, []);
+  const addPhotos = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // if (event.target?.files) return;
+    const files = event.target.files;
+    if (!files?.length) return;
+    setIsUploading(true);
+    for (const file of files) {
+      const name = Date.now() + file.name;
+      supabase.storage
+        .from("photos")
+        .upload(name, file)
+        .then((result) => {
+          setPhotos([...photos, result.data?.path]);
+          console.log(result);
+          setIsUploading(false);
+        })
+        .catch((err) => console.log(err));
+    }
+  };
+
   return (
     <Card>
       <div className="flex gap-2">
@@ -46,13 +67,36 @@ const PostFormCard = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="grow p-3 h-14"
-          placeholder={`Whats on your mind?`}
+          placeholder={`Whats on your mind ${profile?.name} ?`}
         />
       </div>
+      {isUploading && (
+        <div className="py-4 px-2 w-6">
+          <CircleLoader speedMultiplier={1} color={"#ff4500"} />
+        </div>
+      )}
+      {photos.length > 0 && (
+        <div className="flex gap-2">
+          {photos.map((photo) => (
+            <div className="mt-2" key={photo}>
+              <img
+                src={photoUrl(photo)}
+                alt=""
+                className="w-auto h-24 rounded-md"
+              />
+            </div>
+          ))}
+        </div>
+      )}
       <div className="flex gap-5 items-center mt-2">
         <div>
           <label className="flex gap-1">
-            <input type="file" className="hidden" multiple />
+            <input
+              type="file"
+              className="hidden"
+              multiple
+              onChange={addPhotos}
+            />
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

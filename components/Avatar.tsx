@@ -1,6 +1,6 @@
 import React from "react";
 
-type AvatarProps = {
+export type AvatarProps = {
   size?: string;
   url: string;
 };
