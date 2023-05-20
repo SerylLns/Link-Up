@@ -1,27 +1,36 @@
 import Avatar from "./Avatar";
 import Card from "./Card";
 // import ClickOutHandler from 'react-clickout-handler'
-import React, { MouseEvent, useContext, useState } from "react";
+import React, { MouseEvent, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { ProfileType } from "./PostFormCard";
 import ReactTimeAgo from "react-time-ago";
 import { UserContext } from "@/contexts/userContext";
 import { photoUrl } from "@/helpers/photoHelpers";
 import Image from "next/image";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export type PostType = {
   id: string;
   content: string;
   profiles: ProfileType;
   created_at: string;
-  photos: Array<string>;
+  photos?: Array<string>;
 };
 
 export default function PostCard({ post }: { post: PostType }) {
+  const [likes, setLikes] = useState<any>(null);
+  const [newComment, setNewComment] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { profile: myProfile } = useContext(UserContext);
   const { profiles: authorProfile } = post;
+
+  const supabase = useSupabaseClient();
   const { photos } = post;
+
+  useEffect(() => {
+    fetchLikes();
+  }, []);
 
   function openDropdown(event: MouseEvent) {
     event.stopPropagation();
@@ -31,6 +40,33 @@ export default function PostCard({ post }: { post: PostType }) {
   //   event.stopPropagation();
   //   setDropdownOpen(false);
   // }
+
+  function fetchLikes() {
+    supabase
+      .from("likes")
+      .select()
+      .eq("post_id", post.id)
+      .then((result) => setLikes(result.data));
+  }
+  const currentUserLiked: boolean =
+    likes && !!likes.find((like: any) => like.user_id === myProfile?.id);
+
+  const handleLike = () => {
+    if (currentUserLiked) {
+      supabase
+        .from("likes")
+        .delete()
+        .eq("post_id", post.id)
+        .eq("user_id", myProfile.id)
+        .then((res) => fetchLikes());
+      return;
+    }
+    supabase
+      .from("likes")
+      .insert({ post_id: post.id, user_id: myProfile.id })
+      .then(() => fetchLikes());
+  };
+
   return (
     <Card>
       <div className="flex gap-3">
@@ -186,7 +222,7 @@ export default function PostCard({ post }: { post: PostType }) {
       </div>
       <div>
         <p className="my-3 text-sm">{post.content}</p>
-        {photos?.length > 0 && (
+        {photos && (
           <div className="flex gap-4">
             {photos.map((photo) => (
               <div key={photo} className="">
@@ -201,10 +237,15 @@ export default function PostCard({ post }: { post: PostType }) {
         )}
       </div>
       <div className="mt-5 flex gap-8">
-        <button className="flex gap-2 items-center">
+        {/* LIKES */}
+        <button
+          onClick={handleLike}
+          className="flex gap-2 items-center text-red-800"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            fill="none"
+            fill={currentUserLiked ? "currentColor" : "none"}
+            // fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
@@ -216,7 +257,7 @@ export default function PostCard({ post }: { post: PostType }) {
               d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
             />
           </svg>
-          72
+          {likes?.length || "0"}
         </button>
         <button className="flex gap-2 items-center">
           <svg
@@ -259,6 +300,8 @@ export default function PostCard({ post }: { post: PostType }) {
         </div>
         <div className="border grow rounded-full relative">
           <textarea
+            value={newComment}
+            onChange={(event) => setNewComment(event.target.value)}
             className="block w-full p-3 px-4 overflow-hidden h-12 rounded-full"
             placeholder="Laisse un commentaire..."
           />

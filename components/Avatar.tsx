@@ -6,8 +6,8 @@ import React, { FormEvent, useState } from "react";
 export type AvatarProps = {
   size?: string;
   url: string;
-  editable: boolean;
-  onChange: () => void;
+  editable?: boolean;
+  onChange?: () => void;
 };
 
 const Avatar = ({

@@ -5,11 +5,8 @@ import LoginPage from "./login";
 import PostFormCard, { ProfileType } from "@/components/PostFormCard";
 import { useEffect, useState } from "react";
 import PostCard, { PostType } from "@/components/Post";
-import TimeAgo from "javascript-time-ago";
-import fr from "javascript-time-ago/locale/fr.json";
 import { UserContext } from "@/contexts/userContext";
 
-TimeAgo.addDefaultLocale(fr);
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
