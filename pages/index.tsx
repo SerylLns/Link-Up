@@ -5,7 +5,7 @@ import LoginPage from "./login";
 import PostFormCard, { ProfileType } from "@/components/PostFormCard";
 import { useEffect, useState } from "react";
 import PostCard, { PostType } from "@/components/Post";
-import { UserContext } from "@/contexts/userContext";
+import { UserContext, UserContextProvider } from "@/contexts/userContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,21 +18,6 @@ export default function Home() {
   useEffect(() => {
     fetchPost();
   }, []);
-
-  useEffect(() => {
-    if (!session?.user?.id) {
-      return;
-    }
-    supabase
-      .from("profiles")
-      .select()
-      .eq("id", session.user.id)
-      .then((response) => {
-        if (response.data?.length) {
-          setProfile(response.data[0]);
-        }
-      });
-  }, [session?.user?.id]);
 
   const fetchPost = () => {
     supabase
@@ -49,13 +34,13 @@ export default function Home() {
   }
   return (
     <Layout>
-      <UserContext.Provider value={{ profile }}>
+      <UserContextProvider>
         <PostFormCard onPost={fetchPost} />
         {posts.length &&
           posts.map((post: PostType) => {
             return <PostCard key={post.id} post={post} />;
           })}
-      </UserContext.Provider>
+      </UserContextProvider>
     </Layout>
   );
 }

@@ -1,7 +1,13 @@
 import Avatar from "./Avatar";
 import Card from "./Card";
 // import ClickOutHandler from 'react-clickout-handler'
-import React, { MouseEvent, useContext, useEffect, useState } from "react";
+import React, {
+  FormEvent,
+  MouseEvent,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import Link from "next/link";
 import { ProfileType } from "./PostFormCard";
 import ReactTimeAgo from "react-time-ago";
@@ -21,6 +27,7 @@ export type PostType = {
 export default function PostCard({ post }: { post: PostType }) {
   const [likes, setLikes] = useState<any>(null);
   const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState<any>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { profile: myProfile } = useContext(UserContext);
   const { profiles: authorProfile } = post;
@@ -30,6 +37,7 @@ export default function PostCard({ post }: { post: PostType }) {
 
   useEffect(() => {
     fetchLikes();
+    fetchComments();
   }, []);
 
   function openDropdown(event: MouseEvent) {
@@ -48,6 +56,15 @@ export default function PostCard({ post }: { post: PostType }) {
       .eq("post_id", post.id)
       .then((result) => setLikes(result.data));
   }
+
+  function fetchComments() {
+    supabase
+      .from("comments")
+      .select("*, profiles(*)")
+      .eq("post_id", post.id)
+      .then((result) => setComments(result.data));
+  }
+
   const currentUserLiked: boolean =
     likes && !!likes.find((like: any) => like.user_id === myProfile?.id);
 
@@ -65,6 +82,15 @@ export default function PostCard({ post }: { post: PostType }) {
       .from("likes")
       .insert({ post_id: post.id, user_id: myProfile.id })
       .then(() => fetchLikes());
+  };
+
+  const addPost = (event: FormEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    if (newComment.length < 1) return;
+    supabase
+      .from("comments")
+      .insert({ content: newComment, author: myProfile.id, post_id: post.id })
+      .then((res) => console.log(res));
   };
 
   return (
@@ -299,29 +325,55 @@ export default function PostCard({ post }: { post: PostType }) {
           <Avatar url={myProfile?.avatar} size="xs" />
         </div>
         <div className="border grow rounded-full relative">
-          <textarea
-            value={newComment}
-            onChange={(event) => setNewComment(event.target.value)}
-            className="block w-full p-3 px-4 overflow-hidden h-12 rounded-full"
-            placeholder="Laisse un commentaire..."
-          />
-          <button className="absolute top-3 right-3 text-gray-400">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-              />
-            </svg>
-          </button>
+          <form onSubmit={addPost}>
+            <input
+              value={newComment}
+              onChange={(event) => setNewComment(event.target.value)}
+              className="block w-full p-3 px-4 overflow-hidden h-12 rounded-full"
+              placeholder="Laisse un commentaire..."
+            />
+            <button className="absolute top-3 right-3 text-gray-400">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                />
+              </svg>
+            </button>
+          </form>
         </div>
+      </div>
+      <div>
+        {comments.length > 0 &&
+          comments.map((comment) => (
+            <div key={comment.id} className="mt-2 flex gap-2 items-center">
+              <Avatar url={comment.profiles.avatar} />
+              <div className="bg-gray-200 py-2 px-4 rounded-3xl">
+                <div>
+                  <Link href={"/profile/" + comment.profiles.id}>
+                    <span className="hover:underline font-semibold mr-1">
+                      {comment.profiles.name}
+                    </span>
+                  </Link>
+                  <span className="text-sm text-gray-400">
+                    <ReactTimeAgo
+                      timeStyle={"twitter"}
+                      date={new Date(comment.created_at).getTime()}
+                    />
+                  </span>
+                </div>
+                <p className="text-sm">{comment.content}</p>
+              </div>
+            </div>
+          ))}
       </div>
     </Card>
   );
