@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { FormEvent, useContext, useState } from "react";
 import Card from "./Card";
 import Avatar from "./Avatar";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { UserContext } from "@/contexts/userContext";
-import { Result } from "postcss";
 import { photoUrl } from "@/helpers/photoHelpers";
 import { CircleLoader } from "react-spinners";
+import Image from "next/image";
 
 export type ProfileType = {
   id: Number;
@@ -38,9 +38,9 @@ const PostFormCard = ({ onPost }: { onPost: () => void }) => {
       });
   };
 
-  const addPhotos = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const addPhotos = (event: FormEvent<HTMLInputElement>) => {
     // if (event.target?.files) return;
-    const files = event.target.files;
+    const files = event.currentTarget.files;
     if (!files?.length) return;
     setIsUploading(true);
     for (const file of files) {
@@ -50,7 +50,6 @@ const PostFormCard = ({ onPost }: { onPost: () => void }) => {
         .upload(name, file)
         .then((result) => {
           setPhotos([...photos, result.data?.path]);
-          console.log(result);
           setIsUploading(false);
         })
         .catch((err) => console.log(err));
@@ -77,8 +76,8 @@ const PostFormCard = ({ onPost }: { onPost: () => void }) => {
       )}
       {photos.length > 0 && (
         <div className="flex gap-2">
-          {photos.map((photo) => (
-            <div className="mt-2" key={photo}>
+          {photos.map((photo, i) => (
+            <div className="mt-2" key={i}>
               <img
                 src={photoUrl(photo)}
                 alt=""
@@ -179,7 +178,7 @@ const PostFormCard = ({ onPost }: { onPost: () => void }) => {
         <div className="grow text-right">
           <button
             onClick={createPost}
-            className="bg-socialBlue text-white px-6 py-1 rounded-md"
+            className="bg-primary opacity-80 hover:opacity-100 text-white px-6 py-1 rounded-md"
           >
             Share
           </button>

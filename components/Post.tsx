@@ -7,6 +7,7 @@ import { ProfileType } from "./PostFormCard";
 import ReactTimeAgo from "react-time-ago";
 import { UserContext } from "@/contexts/userContext";
 import { photoUrl } from "@/helpers/photoHelpers";
+import Image from "next/image";
 
 export type PostType = {
   id: string;
@@ -42,8 +43,8 @@ export default function PostCard({ post }: { post: PostType }) {
         </div>
         <div className="grow">
           <p>
-            <Link href={"/profile"}>
-              <span className="mr-1 font-semibold cursor-pointer hover:underline">
+            <Link href={`/profile/${authorProfile.id}`}>
+              <span className="mr-1 font-semibold cursor-pointer text-neutralDark hover:underline">
                 {authorProfile.name}
               </span>
             </Link>
@@ -188,7 +189,7 @@ export default function PostCard({ post }: { post: PostType }) {
         {photos?.length > 0 && (
           <div className="flex gap-4">
             {photos.map((photo) => (
-              <div key={photo} className="max-h-96">
+              <div key={photo} className="">
                 <img
                   src={photoUrl(photo)}
                   className="rounded-md max-h-full w-full object-fill		"
@@ -259,7 +260,7 @@ export default function PostCard({ post }: { post: PostType }) {
         <div className="border grow rounded-full relative">
           <textarea
             className="block w-full p-3 px-4 overflow-hidden h-12 rounded-full"
-            placeholder="Leave a comment"
+            placeholder="Laisse un commentaire..."
           />
           <button className="absolute top-3 right-3 text-gray-400">
             <svg

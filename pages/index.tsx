@@ -2,7 +2,6 @@ import Layout from "@/components/Layout";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { Inter } from "next/font/google";
 import LoginPage from "./login";
-import NavigationCard from "@/components/NavigationCard";
 import PostFormCard, { ProfileType } from "@/components/PostFormCard";
 import { useEffect, useState } from "react";
 import PostCard, { PostType } from "@/components/Post";
