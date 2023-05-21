@@ -10,7 +10,7 @@ export const userInitialState = {
   created_at: null,
 };
 
-export const UserContext: Context<object> = createContext({});
+export const UserContext: Context<any> = createContext({});
 
 export function UserContextProvider({ children }: { children: any }) {
   const session = useSession();

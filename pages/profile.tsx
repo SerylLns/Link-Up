@@ -14,7 +14,7 @@ const ProfilePage = () => {
   const router = useRouter();
 
   const [profile, setProfile] = useState<any>(null);
-  const userId = router.query?.id;
+  const userId = router.query.id?.toString();
   const session = useSession();
   const supabase = useSupabaseClient();
   const coverUrl = profile?.cover;

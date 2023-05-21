@@ -6,7 +6,7 @@ const ProfileTabs = ({
   userId,
 }: {
   active: string;
-  userId: string;
+  userId: string | undefined;
 }) => {
   const tabClasses =
     "flex gap-1 px-4 py-1 items-center border-b-4 border-b-white";

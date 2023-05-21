@@ -28,7 +28,8 @@ export default function PostCard({ post }: { post: PostType }) {
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<any>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { profile: myProfile } = useContext(UserContext);
+  const currentUser = useContext(UserContext);
+  const myProfile = currentUser?.profile;
   const { users: authorProfile } = post;
 
   const supabase = useSupabaseClient();
@@ -83,7 +84,7 @@ export default function PostCard({ post }: { post: PostType }) {
       .then(() => fetchLikes());
   };
 
-  const addPost = (event: FormEvent<HTMLInputElement>) => {
+  const addPost = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (newComment.length < 1) return;
     supabase
@@ -95,7 +96,7 @@ export default function PostCard({ post }: { post: PostType }) {
       });
   };
 
-  const savedPost = (event: FormEvent<HTMLInputElement>) => {
+  const savedPost = (event: FormEvent<HTMLButtonElement>) => {
     event.preventDefault();
     supabase
       .from("saved_posts")
@@ -150,9 +151,8 @@ export default function PostCard({ post }: { post: PostType }) {
             <div className="relative">
               {dropdownOpen && (
                 <div className="absolute -right-6 z-10 bg-white shadow-md shadow-gray-300 p-3 rounded-sm border border-gray-100 w-52">
-                  <a
+                  <button
                     onClick={savedPost}
-                    href=""
                     className="flex gap-3 py-2 my-2 hover:bg-socialBlue hover:text-white -mx-4 px-4 rounded-md transition-all hover:scale-110 hover:shadow-md shadow-gray-300"
                   >
                     <svg
@@ -170,7 +170,7 @@ export default function PostCard({ post }: { post: PostType }) {
                       />
                     </svg>
                     Enregistrer le post
-                  </a>
+                  </button>
                   <a
                     href=""
                     className="flex gap-3 py-2 my-2 hover:bg-socialBlue hover:text-white -mx-4 px-4 rounded-md transition-all hover:scale-110 hover:shadow-md shadow-gray-300"
@@ -364,7 +364,7 @@ export default function PostCard({ post }: { post: PostType }) {
       </div>
       <div>
         {comments.length > 0 &&
-          comments.map((comment) => (
+          comments.map((comment: any) => (
             <div key={comment.id} className="mt-2 flex gap-2 items-center">
               <Avatar url={comment.users.avatar} />
               <div className="bg-gray-200 py-2 px-4 rounded-3xl">

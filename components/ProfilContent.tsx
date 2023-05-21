@@ -11,7 +11,7 @@ export default function ProfileContent({
   userId,
 }: {
   activeTab: string;
-  userId: string;
+  userId: string | undefined;
 }) {
   const [posts, setPosts] = useState<any>([]);
   const [profile, setProfile] = useState<any>(null);
@@ -25,6 +25,7 @@ export default function ProfileContent({
   }, [userId]);
 
   async function loadPosts() {
+    if (!userId) return;
     const posts = await userPosts(userId);
     const profile = await userProfile(userId);
     setPosts(posts);

@@ -23,7 +23,7 @@ const PostFormCard = ({ onPost }: { onPost: () => void }) => {
   const session = useSession();
   const { profile } = useContext(UserContext);
 
-  const createPost = (event: Event) => {
+  const createPost = (event: FormEvent<HTMLButtonElement>) => {
     event.preventDefault();
     const data = { content, author: session?.user.id, photos };
     supabase
@@ -41,18 +41,19 @@ const PostFormCard = ({ onPost }: { onPost: () => void }) => {
   const addPhotos = (event: FormEvent<HTMLInputElement>) => {
     // if (event.target?.files) return;
     const files = event.currentTarget.files;
-    if (!files?.length) return;
-    setIsUploading(true);
-    for (const file of files) {
-      const name = Date.now() + file.name;
-      supabase.storage
-        .from("photos")
-        .upload(name, file)
-        .then((result) => {
-          setPhotos([...photos, result.data?.path]);
-          setIsUploading(false);
-        })
-        .catch((err) => console.log(err));
+    if (files) {
+      setIsUploading(true);
+      Object.keys(files).forEach((key: any) => {
+        const name = Date.now() + files[key].name;
+        supabase.storage
+          .from("photos")
+          .upload(name, files[key])
+          .then((result) => {
+            setPhotos([...photos, result.data?.path]);
+            setIsUploading(false);
+          })
+          .catch((err) => console.log(err));
+      });
     }
   };
 
