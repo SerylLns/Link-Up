@@ -23,10 +23,11 @@ const Avatar = ({
   let width = "w-12";
   if (size === "lg") {
     width = "w-24 md:w-36";
+  } else if (size === "sm") {
+    width = "w-10 ";
   }
 
   const updateAvatar = async (event: FormEvent<HTMLInputElement>) => {
-    setIsUploading(true);
     const file = event.currentTarget.files?.[0];
     if (!file) return;
     if (file && session?.user) {

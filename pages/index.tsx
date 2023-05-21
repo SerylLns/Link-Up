@@ -16,7 +16,6 @@ export default function Home() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    console.log(session);
     fetchPost();
   }, []);
 
