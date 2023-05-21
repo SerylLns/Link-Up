@@ -34,13 +34,13 @@ export default function ProfileContent({
   async function userPosts(userId: string) {
     const { data } = await supabase
       .from("posts")
-      .select("id, content, created_at, profiles(id, avatar, name)")
+      .select("id, content, created_at, users(id, avatar, name)")
       .eq("author", userId);
     return data;
   }
 
   async function userProfile(userId: string) {
-    const { data } = await supabase.from("profiles").select().eq("id", userId);
+    const { data } = await supabase.from("users").select().eq("id", userId);
     return data?.[0];
   }
 

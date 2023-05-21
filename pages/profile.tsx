@@ -5,7 +5,7 @@ import Layout from "@/components/Layout";
 import PostCard from "@/components/Post";
 import ProfileContent from "@/components/ProfilContent";
 import ProfileTabs from "@/components/ProfileTabs";
-import { UserContext } from "@/contexts/userContext";
+import { UserContext, UserContextProvider } from "@/contexts/userContext";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -24,7 +24,7 @@ const ProfilePage = () => {
 
   const fetchUser = () => {
     supabase
-      .from("profiles")
+      .from("users")
       .select()
       .eq("id", userId)
       .then((response) => {
@@ -56,7 +56,7 @@ const ProfilePage = () => {
 
   return (
     <Layout>
-      <UserContext.Provider value={{ profile }}>
+      <UserContextProvider>
         <Card noPadding={true}>
           <div className="relative overflow-hidden rounded-md">
             <Cover
@@ -91,7 +91,7 @@ const ProfilePage = () => {
           </div>
         </Card>
         <ProfileContent activeTab={tab} userId={userId} />
-      </UserContext.Provider>
+      </UserContextProvider>
     </Layout>
   );
 };

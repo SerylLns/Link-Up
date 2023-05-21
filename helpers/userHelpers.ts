@@ -25,7 +25,7 @@ export const uploadUserProfileImage = async (
     if (data) {
       const newUrl = photoUrl(data.path, bucket);
       supabase
-        .from("profiles")
+        .from("users")
         .update({ [column]: newUrl })
         .eq("id", userId)
         .then((res) => {

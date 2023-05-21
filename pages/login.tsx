@@ -7,9 +7,11 @@ export default function LoginPage() {
   const supabase = useSupabaseClient();
 
   async function loginWithGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
+    await supabase.auth
+      .signInWithOAuth({
+        provider: "google",
+      })
+      .catch((error) => console.log(error));
   }
   return (
     <Layout hideNavigation={true}>

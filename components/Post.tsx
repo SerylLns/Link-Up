@@ -13,13 +13,12 @@ import { ProfileType } from "./PostFormCard";
 import ReactTimeAgo from "react-time-ago";
 import { UserContext } from "@/contexts/userContext";
 import { photoUrl } from "@/helpers/photoHelpers";
-import Image from "next/image";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 export type PostType = {
   id: string;
   content: string;
-  profiles: ProfileType;
+  users: ProfileType;
   created_at: string;
   photos?: Array<string>;
 };
@@ -30,7 +29,7 @@ export default function PostCard({ post }: { post: PostType }) {
   const [comments, setComments] = useState<any>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { profile: myProfile } = useContext(UserContext);
-  const { profiles: authorProfile } = post;
+  const { users: authorProfile } = post;
 
   const supabase = useSupabaseClient();
   const { photos } = post;
@@ -60,7 +59,7 @@ export default function PostCard({ post }: { post: PostType }) {
   function fetchComments() {
     supabase
       .from("comments")
-      .select("*, profiles(*)")
+      .select("*, users(*)")
       .eq("post_id", post.id)
       .then((result) => setComments(result.data));
   }
@@ -90,6 +89,17 @@ export default function PostCard({ post }: { post: PostType }) {
     supabase
       .from("comments")
       .insert({ content: newComment, author: myProfile.id, post_id: post.id })
+      .then((res) => {
+        setNewComment("");
+        fetchComments();
+      });
+  };
+
+  const savedPost = (event: FormEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    supabase
+      .from("saved_posts")
+      .insert({ post_id: post.id, user_id: myProfile.id })
       .then((res) => console.log(res));
   };
 
@@ -139,8 +149,9 @@ export default function PostCard({ post }: { post: PostType }) {
           <>
             <div className="relative">
               {dropdownOpen && (
-                <div className="absolute -right-6 bg-white shadow-md shadow-gray-300 p-3 rounded-sm border border-gray-100 w-52">
+                <div className="absolute -right-6 z-10 bg-white shadow-md shadow-gray-300 p-3 rounded-sm border border-gray-100 w-52">
                   <a
+                    onClick={savedPost}
                     href=""
                     className="flex gap-3 py-2 my-2 hover:bg-socialBlue hover:text-white -mx-4 px-4 rounded-md transition-all hover:scale-110 hover:shadow-md shadow-gray-300"
                   >
@@ -158,7 +169,7 @@ export default function PostCard({ post }: { post: PostType }) {
                         d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"
                       />
                     </svg>
-                    Save post
+                    Enregistrer le post
                   </a>
                   <a
                     href=""
@@ -300,7 +311,7 @@ export default function PostCard({ post }: { post: PostType }) {
               d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
             />
           </svg>
-          11
+          {comments.length}
         </button>
         <button className="flex gap-2 items-center">
           <svg
@@ -355,12 +366,12 @@ export default function PostCard({ post }: { post: PostType }) {
         {comments.length > 0 &&
           comments.map((comment) => (
             <div key={comment.id} className="mt-2 flex gap-2 items-center">
-              <Avatar url={comment.profiles.avatar} />
+              <Avatar url={comment.users.avatar} />
               <div className="bg-gray-200 py-2 px-4 rounded-3xl">
                 <div>
-                  <Link href={"/profile/" + comment.profiles.id}>
+                  <Link href={"/profile/" + comment.users.id}>
                     <span className="hover:underline font-semibold mr-1">
-                      {comment.profiles.name}
+                      {comment.users.name}
                     </span>
                   </Link>
                   <span className="text-sm text-gray-400">

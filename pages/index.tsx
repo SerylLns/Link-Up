@@ -16,13 +16,14 @@ export default function Home() {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
+    console.log(session);
     fetchPost();
   }, []);
 
   const fetchPost = () => {
     supabase
       .from("posts")
-      .select("id, content, created_at, photos, profiles(id, avatar, name) ")
+      .select("id, content, created_at, photos, users(id, avatar, name) ")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (data?.length) setPosts(data);

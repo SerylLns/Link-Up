@@ -10,7 +10,7 @@ export const userInitialState = {
   created_at: null,
 };
 
-const UserContext: Context<object> = createContext({});
+export const UserContext: Context<object> = createContext({});
 
 export function UserContextProvider({ children }: { children: any }) {
   const session = useSession();
@@ -21,7 +21,7 @@ export function UserContextProvider({ children }: { children: any }) {
       return;
     }
     supabase
-      .from("profiles")
+      .from("users")
       .select()
       .eq("id", session.user.id)
       .then((result) => {
